@@ -17,7 +17,8 @@ homepage          in ThisBuild := Some(new URL("http://github.com/pawelkaczor/ak
 licenses          in ThisBuild := ("Apache2", new URL("http://raw.githubusercontent.com/pawelkaczor/akka-ddd/master/LICENSE.md")) :: Nil
 
 lazy val root = (project in file("."))
-  .aggregate(`akka-ddd-messaging`, `akka-ddd-monitoring`, `akka-ddd-core`, `akka-ddd-write-front`, `view-update`, `view-update-sql`, `akka-ddd-test`, `eventstore-akka-persistence`, `http-support`, `akka-ddd-scheduling`)
+  .aggregate(`akka-ddd-messaging`, `akka-ddd-monitoring`, `akka-ddd-core`, `akka-ddd-write-front`, `view-update`, `view-update-sql`, `view-update-cassandra`, `akka-ddd-test`,
+    `eventstore-akka-persistence`, `http-support`, `akka-ddd-scheduling`)
   .settings(
     commonSettings,
     publishArtifact := false
@@ -75,6 +76,21 @@ lazy val `view-update-sql` = project
     ))
   .dependsOn(`view-update`, `akka-ddd-test` % "test->compile;test->test", `eventstore-akka-persistence` % "test->compile")
 
+lazy val `view-update-cassandra` = project
+  .configs(IntegrationTest)
+  .settings(
+    commonSettings,
+    scalacOptions ++= Seq("-language:existentials", "-language:implicitConversions"),
+    inConfig(IntegrationTest)(Defaults.testTasks),
+    testOptions       in Test            := Seq(Tests.Filter(specFilter)),
+    testOptions       in IntegrationTest := Seq(Tests.Filter(integrationFilter)),
+    parallelExecution in IntegrationTest := false,
+    libraryDependencies ++= Seq(
+      Akka.persistenceCassandra,
+      scalaTest % "test", Akka.testkit % "test",
+      logbackClassic % "test", scalaCheck % "test"
+    ))
+  .dependsOn(`view-update`, `akka-ddd-test` % "test->compile;test->test")
 
 lazy val `akka-ddd-test` = project
   .configs(IntegrationTest)

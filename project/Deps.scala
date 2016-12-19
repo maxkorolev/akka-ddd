@@ -5,6 +5,7 @@ object Deps {
   object Version {
     val Akka                  = "2.4.14"
     val AkkaHttp              = "10.0.0"
+    val AkkaPersistenceCassandra  = "0.21"
 
     val EventStoreClient      = "3.0.4"
     val EventStoreAkkaJournal = "3.0.6"
@@ -27,17 +28,18 @@ object Deps {
   }
 
   object Akka {
-    val actor             = apply("actor")
-    val clusterTools      = apply("cluster-tools")
-    val clusterSharding   = apply("cluster-sharding")
-    val contributions     = apply("contrib")
-    val multiNodeTestkit  = apply("multi-node-testkit")
-    val persistence       = apply("persistence")
-    val slf4j             = apply("slf4j")
-    val stream            = apply("stream")
-    val testkit           = apply("testkit")
+    val actor                 = apply("actor")
+    val clusterTools          = apply("cluster-tools")
+    val clusterSharding       = apply("cluster-sharding")
+    val contributions         = apply("contrib")
+    val multiNodeTestkit      = apply("multi-node-testkit")
+    val persistence           = apply("persistence")
+    val persistenceCassandra  = apply("persistence-cassandra", "0.21")
+    val slf4j                 = apply("slf4j")
+    val stream                = apply("stream")
+    val testkit               = apply("testkit")
 
-    private def apply(moduleName: String) = "com.typesafe.akka" %% s"akka-$moduleName" % Version.Akka
+    private def apply(moduleName: String, version: String = Version.Akka) = "com.typesafe.akka" %% s"akka-$moduleName" % version
   }
 
   object AkkaHttp {
