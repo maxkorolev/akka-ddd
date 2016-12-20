@@ -15,16 +15,23 @@ object MetaData {
   val SessionId           = "sessionId"
 
   def empty: MetaData = MetaData(Map.empty)
+
+
+  def apply(content0: Map[String, String]): MetaData = new MetaData {
+    override def content: Map[String, String] = content0
+  }
 }
 
-case class MetaData(content: Map[String, Any]) extends Serializable {
+trait MetaData {
+
+  def content: Map[String, String]
 
   def mergeWithMetadata(metadata: Option[MetaData]): MetaData = {
     metadata.map(_.content).map(addContent).getOrElse(this)
   }
 
-  def addContent(content: Map[String, Any]): MetaData = {
-    copy(content = this.content ++ content)
+  def addContent(content: Map[String, String]): MetaData = {
+    MetaData(this.content ++ content)
   }
 
   def contains(attrName: String) = content.contains(attrName)
@@ -59,7 +66,7 @@ trait Message extends Serializable {
     copyWithMetaData(this.metadata.map(_.mergeWithMetadata(metadata)).orElse(metadata))
   }
 
-  def withMetaData(metadataContent: Map[String, Any]): MessageImpl = {
+  def withMetaData(metadataContent: Map[String, String]): MessageImpl = {
     withMetaData(Some(MetaData(metadataContent)))
   }
 
@@ -67,7 +74,8 @@ trait Message extends Serializable {
 
   def metadata: Option[MetaData]
 
-  def withMetaAttribute(attrName: String, value: Any): MessageImpl = withMetaData(Map(attrName -> value))
+  def withMetaAttribute(attrName: String, value: String): MessageImpl = withMetaData(Map(attrName -> value))
+  def withMetaAttribute(attrName: String, value: Long): MessageImpl = withMetaData(Map(attrName -> value.toString))
 
   def hasMetaAttribute(attrName: String) = metadata.exists(_.contains(attrName))
 
@@ -89,10 +97,7 @@ trait Message extends Serializable {
 
   def withSessionId(sessionId: EntityId) = withMetaAttribute(SessionId, sessionId)
 
-  def deliveryId: Option[Long] = tryGetMetaAttribute[Any](DeliveryId).map {
-    case bigInt: scala.math.BigInt => bigInt.toLong
-    case l: Long => l
-  }
+  def deliveryId: Option[Long] = tryGetMetaAttribute[String](DeliveryId).map(_.toLong)
 
   def correlationId: Option[EntityId] = tryGetMetaAttribute[EntityId](CorrelationId)
 

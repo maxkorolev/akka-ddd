@@ -29,7 +29,11 @@ lazy val `akka-ddd-messaging` = project
   .settings(
     commonSettings,
     scalacOptions ++= Seq("-language:implicitConversions"),
-    libraryDependencies ++= Json.`4s` ++ Seq(Akka.stream, nscalaTime)
+    PB.targets in Compile := Seq(
+      PB.gens.java -> (sourceManaged in Compile).value,
+      scalapb.gen(javaConversions = true) -> (sourceManaged in Compile).value
+    ),
+    libraryDependencies ++= Json.`4s` ++ Seq(Akka.stream, nscalaTime, ScalaPB.core)
   )
 
 

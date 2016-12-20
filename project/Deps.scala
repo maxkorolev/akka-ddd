@@ -9,7 +9,8 @@ object Deps {
 
     val EventStoreClient      = "3.0.4"
     val EventStoreAkkaJournal = "3.0.6"
-    
+
+    val scalapb               = "0.5.42"
     val json4s                = "3.5.0"
 
     val Slick                 = "3.1.1"
@@ -59,6 +60,12 @@ object Deps {
     val ext     = apply("ext")
 
     private def apply(moduleName: String) = "org.json4s" %% s"json4s-$moduleName" % Version.json4s
+  }
+
+  object ScalaPB {
+    val core  = apply
+
+    private def apply = "com.trueaccord.scalapb" %% "scalapb-runtime" % Version.scalapb % "protobuf"
   }
 
   object Eventstore {

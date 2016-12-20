@@ -116,7 +116,7 @@ class SagaSpec extends TestKit(TestConfig.testSystem) with WordSpecLike with Imp
     val entityId = previouslySentMsg.flatMap(msg => msg.correlationId).getOrElse(processId)
     OfficeEventMessage(CaseId(entityId, event.dummyVersion), event).withMetaData(Map(
       CorrelationId -> entityId,
-      DeliveryId -> 1L
+      DeliveryId -> 1L.toString
     )).withMustFollow(previouslySentMsg.map(msg => msg.id))
   }
 

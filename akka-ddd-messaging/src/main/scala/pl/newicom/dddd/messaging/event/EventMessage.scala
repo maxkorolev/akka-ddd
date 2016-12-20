@@ -27,8 +27,6 @@ object EventMessage {
 
     override def metadata: Option[MetaData] = metaData0
 
-    override def copyWithMetaData(newMetaData: Option[MetaData]): MessageImpl =
-      EventMessage(event, id, timestamp, newMetaData)
   }
 }
 
@@ -39,6 +37,9 @@ trait EventMessage extends Message with AddressableMessage {
   def event: DomainEvent
   def id: String
   def timestamp: DateTime
+
+  override def copyWithMetaData(newMetaData: Option[MetaData]): MessageImpl =
+    EventMessage(event, id, timestamp, newMetaData).asInstanceOf[MessageImpl]
 
   override def destination = tryGetMetaAttribute[String](CorrelationId)
   override def payload = event
