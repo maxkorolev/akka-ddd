@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package pl.newicom.dddd.messaging;
+
+import "scalapb/scalapb.proto";
+
+option (scalapb.options) = {
+    import: "pl.newicom.dddd.utils.TypeMappers._"
+    import: "scala.collection.JavaConversions._"
+};
+
+message CaseIdProto {
+    string entityId = 1;
+    int64 version = 2;
+}
+
+message EventMessageProto {
+
+    bytes event = 1[(scalapb.field).type = "scala.Array[Byte]"];
+    string id = 2;
+    int64 timestamp = 3[(scalapb.field).type = "org.joda.time.DateTime"];
+}
+
+message OfficeEventMessageProto {
+
+    CaseIdProto caseId = 1;
+    bytes event = 2[(scalapb.field).type = "scala.Array[Byte]"];
+    string id = 3;
+    int64 timestamp = 4[(scalapb.field).type = "org.joda.time.DateTime"];
+}
+

@@ -43,12 +43,11 @@ trait DefaultEventStreamSubscriber extends EventStreamSubscriber {
         FlowShape(zip.in1, zip.out)
       })
 
-    val triggerActor = flow
-      .toMat {
-        Sink.actorRef(self, onCompleteMessage = Kill)}(Keep.both)
-      .runWith {
-        Source.actorRef(demandConfig.subscriberCapacity, OverflowStrategy.dropNew)
-      }
+    val triggerActor = flow.toMat {
+      Sink.actorRef(self, onCompleteMessage = Kill)
+    }(Keep.both).runWith {
+      Source.actorRef(demandConfig.subscriberCapacity, OverflowStrategy.dropNew)
+    }
 
     new DemandController(triggerActor, demandConfig.initialDemand)
   }

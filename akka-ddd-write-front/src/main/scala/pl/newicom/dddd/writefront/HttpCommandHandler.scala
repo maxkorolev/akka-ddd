@@ -28,14 +28,11 @@ trait HttpCommandHandler extends CommandDispatcher with CommandDirectives with D
       post {
         entity(as[A]) { command =>
           complete {
-            dispatch(toCommandMessage(command)) map toClientResponse
+            dispatch(CommandMessage(command)) map toClientResponse
           }
         }
       }
   }
-
-  def toCommandMessage(command: Command): CommandMessage =
-    CommandMessage(command, uuid, new Date)
 
   def toClientResponse: OfficeResponseToClientResponse =  {
     case Success(result) =>

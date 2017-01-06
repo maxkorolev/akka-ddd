@@ -4,19 +4,21 @@ import akka.actor.ActorRef
 import akka.contrib.pattern.ReceivePipeline
 import akka.contrib.pattern.ReceivePipeline.Inner
 import akka.persistence.PersistentActor
+import org.joda.time.DateTime
 import pl.newicom.dddd.actor.GracefulPassivation
 import pl.newicom.dddd.eventhandling.EventHandler
 import pl.newicom.dddd.messaging.command.CommandMessage
-import pl.newicom.dddd.messaging.event.{CaseId, EventMessage, OfficeEventMessage}
+import pl.newicom.dddd.messaging.event.EventMessage
 import pl.newicom.dddd.messaging.{CollaborationSupport, Deduplication, Message}
 import pl.newicom.dddd.office.OfficeId
 import pl.newicom.dddd.persistence.PersistentActorLogging
+import pl.newicom.dddd.utils.UUIDSupport._
 
 import scala.util.{Failure, Success, Try}
 
 
 trait AggregateRootBase extends BusinessEntity with CollaborationSupport with GracefulPassivation with PersistentActor
-    with EventHandler with EventMessageFactory with ReceivePipeline with Deduplication with PersistentActorLogging {
+    with EventHandler with ReceivePipeline with Deduplication with PersistentActorLogging {
 
   override def id = self.path.name
 
@@ -56,21 +58,19 @@ trait AggregateRootBase extends BusinessEntity with CollaborationSupport with Gr
   /**
     * Event handler, not invoked during recovery.
     */
-  override def handle(senderRef: ActorRef, event: OfficeEventMessage) {
+  def handle(senderRef: ActorRef, event: EventMessage) =
     acknowledgeCommandProcessed(currentCommandMessage)
-  }
 
   def acknowledgeCommand(result: Any) =
     acknowledgeCommandProcessed(currentCommandMessage, Success(result))
 
-  def acknowledgeCommandProcessed(msg: Message, result: Try[Any] = Success("Command processed. Thank you!")) {
-    val deliveryReceipt = msg.deliveryReceipt(result)
-    currentCommandSender ! deliveryReceipt
-  }
+  def acknowledgeCommandProcessed(msg: Message, result: Try[Any] = Success("Command processed. Thank you!")) =
+    currentCommandSender ! msg.deliveryReceipt(result)
 
   def handleDuplicated(msg: Message) =
     acknowledgeCommandProcessed(msg)
 
-  def toOfficeEventMessage(em: EventMessage) = OfficeEventMessage(em, CaseId(id, lastSequenceNr))
+  def toEventMessage(event: DomainEvent): EventMessage =
+    EventMessage(event, uuid, new DateTime)
 
 }

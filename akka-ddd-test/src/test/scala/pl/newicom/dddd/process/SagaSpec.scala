@@ -5,8 +5,7 @@ import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 import pl.newicom.dddd.actor.PassivationConfig
 import pl.newicom.dddd.delivery.protocol.alod.Delivered
-import pl.newicom.dddd.messaging.MetaData._
-import pl.newicom.dddd.messaging.event.{CaseId, EventMessage, OfficeEventMessage}
+import pl.newicom.dddd.messaging.event.{CaseId, EventMessage}
 import pl.newicom.dddd.office.SimpleOffice._
 import pl.newicom.dddd.office.OfficeFactory._
 import pl.newicom.dddd.office.OfficeListener
@@ -114,10 +113,11 @@ class SagaSpec extends TestKit(TestConfig.testSystem) with WordSpecLike with Imp
 
   def toEventMessage(event: ValueChanged, previouslySentMsg: Option[EventMessage] = None): EventMessage = {
     val entityId = previouslySentMsg.flatMap(msg => msg.correlationId).getOrElse(processId)
-    OfficeEventMessage(CaseId(entityId, event.dummyVersion), event).withMetaData(Map(
-      CorrelationId -> entityId,
-      DeliveryId -> 1L.toString
-    )).withMustFollow(previouslySentMsg.map(msg => msg.id))
+    EventMessage(event).copy(
+      correlationId = Option(entityId),
+      deliveryId = Option(1L),
+      mustFollow = previouslySentMsg.map(msg => msg.id)
+    )
   }
 
   def ensureActorTerminated(actor: ActorRef) = {

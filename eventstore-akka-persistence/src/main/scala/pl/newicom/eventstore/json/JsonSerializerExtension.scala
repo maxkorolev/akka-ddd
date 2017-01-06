@@ -12,7 +12,6 @@ import org.json4s.reflect.TypeInfo
 import org.json4s.{Formats, FullTypeHints, _}
 import pl.newicom.dddd.delivery.protocol.Processed
 import pl.newicom.dddd.delivery.protocol.alod.{Processed => AlodProcessed}
-import pl.newicom.dddd.messaging.MetaData
 import pl.newicom.dddd.scheduling.{ScheduledEventMetadata, EventScheduled}
 import pl.newicom.dddd.serialization.{JsonSerHints, JsonExtraSerHints}
 import pl.newicom.dddd.serialization.JsonSerHints._
@@ -29,7 +28,7 @@ class JsonSerializerExtensionImpl(system: ExtendedActorSystem) extends Extension
   val extraHints = JsonExtraSerHints(
     typeHints =
       new FullTypeHints(
-        List(classOf[MetaData], classOf[Processed], classOf[AlodProcessed], classOf[PersistentRepr], classOf[EventScheduled])
+        List(classOf[Processed], classOf[AlodProcessed], classOf[PersistentRepr], classOf[EventScheduled])
       ),
     serializers =
       List(ActorRefSerializer, ActorPathSerializer, new ScheduledEventSerializer, new SnapshotJsonSerializer(system))

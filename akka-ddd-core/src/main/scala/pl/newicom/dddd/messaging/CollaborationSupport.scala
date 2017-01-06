@@ -39,7 +39,7 @@ trait CollaborationSupport extends Stash {
 
     context.become(
       receive andThen {
-        case _ => // expected response received
+        _ => // expected response received
           scheduledTimeout.cancel()
           unstashAll()
           context.unbecome()
@@ -52,8 +52,7 @@ trait CollaborationSupport extends Stash {
 
         case _  =>
           stash()
-      }
-      , discardOld = false)
+      }, discardOld = false)
   }
 
 }

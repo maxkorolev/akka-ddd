@@ -12,7 +12,8 @@ object DeadlinesReceptor {
       .reactTo(currentDeadlinesOfficeId(department).clerk(businessUnit))
       .route {
         case em: EventMessage =>
-          ActorPath.fromString(em.getMetaAttribute("target"))
+//          ActorPath.fromString(em.getMetaAttribute("target"))
+          ActorPath.fromString("will die")
       }
       .copy(isSupporting_MustFollow_Attribute = false)
 }

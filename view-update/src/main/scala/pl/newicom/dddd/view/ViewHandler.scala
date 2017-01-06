@@ -1,12 +1,12 @@
 package pl.newicom.dddd.view
 
 import akka.Done
-import pl.newicom.dddd.messaging.event.OfficeEventMessage
+import pl.newicom.dddd.messaging.event.EventMessage
 import scala.concurrent.Future
 
 abstract class ViewHandler(val vuConfig: ViewUpdateConfig) {
 
-  def handle(eventMessage: OfficeEventMessage, eventNumber: Long): Future[Done]
+  def handle(eventMessage: EventMessage, eventNumber: Long): Future[Done]
 
   def lastEventNumber: Future[Option[Long]]
 

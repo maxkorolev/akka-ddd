@@ -13,17 +13,17 @@ import scala.collection.mutable
   * referring to the ID of the received message.
   */
 trait Deduplication {
-  this: ReceivePipeline =>
+  myself: ReceivePipeline =>
+
   private val ids: mutable.Set[String] = mutable.Set.empty
 
   pipelineInner {
-    case msg: Message =>
-      if (wasReceived(msg)) {
+    case msg: Message if wasReceived(msg) =>
         handleDuplicated(msg)
         HandledCompletely
-      } else {
+
+    case msg: Message =>
         Inner(msg)
-      }
   }
 
   def handleDuplicated(msg: Message)
@@ -37,8 +37,7 @@ trait Deduplication {
   private def wasReceived(msg: Message): Boolean =
     wasReceived(msg.id)
 
-  private def messageReceived(msgId: String): Unit = {
+  private def messageReceived(msgId: String): Unit =
     ids += msgId
-  }
 
 }

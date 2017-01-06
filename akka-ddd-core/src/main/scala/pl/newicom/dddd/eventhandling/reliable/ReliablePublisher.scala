@@ -6,8 +6,7 @@ import akka.persistence._
 import pl.newicom.dddd.aggregate.AggregateRootBase
 import pl.newicom.dddd.delivery.protocol.alod.Processed
 import pl.newicom.dddd.eventhandling.EventPublisher
-import pl.newicom.dddd.messaging.MetaData.DeliveryId
-import pl.newicom.dddd.messaging.event.{EventMessage, OfficeEventMessage}
+import pl.newicom.dddd.messaging.event.EventMessage
 
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
@@ -22,14 +21,13 @@ trait ReliablePublisher extends PersistentActor with EventPublisher with AtLeast
   override def redeliverInterval = 30.seconds
   override def warnAfterNumberOfUnconfirmedAttempts = 15
 
-  override def publish(em: OfficeEventMessage) {
-    deliver(target)(deliveryId => em.withMetaAttribute(DeliveryId, deliveryId))
-  }
+  override def publish(em: EventMessage) =
+    deliver(target)(em.withDeliveryId)
 
   abstract override def receiveRecover: Receive = {
     case event: EventMessage =>
       super.receiveRecover(event)
-      publish(toOfficeEventMessage(event))
+      publish(event)
 
     case Processed(deliveryId, _) =>
       confirmDelivery(deliveryId)

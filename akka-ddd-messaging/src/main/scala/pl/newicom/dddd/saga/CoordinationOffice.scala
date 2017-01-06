@@ -18,7 +18,7 @@ class CoordinationOffice[E: ClassTag](val config: ProcessConfig[E], actor: Actor
         def department = config.department
       })
       .applyTransduction {
-        case em @ EventMessage(_, event) if correlationIdResolver.isDefinedAt(event) =>
+        case em @ EventMessage(event, _, _, _, _, _, _) if correlationIdResolver.isDefinedAt(event) =>
           em.withCorrelationId(correlationIdResolver(event))
       }
       .propagateTo(actorPath)

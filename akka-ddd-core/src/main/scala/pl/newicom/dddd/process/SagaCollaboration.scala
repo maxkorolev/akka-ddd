@@ -6,7 +6,6 @@ import org.joda.time.{DateTime, Period}
 import pl.newicom.dddd.aggregate._
 import pl.newicom.dddd.delivery.protocol.DeliveryHandler
 import pl.newicom.dddd.messaging.Message
-import pl.newicom.dddd.messaging.MetaData._
 import pl.newicom.dddd.messaging.command.CommandMessage
 import pl.newicom.dddd.office.OfficeFactory._
 import pl.newicom.dddd.office.{CommandHandlerResolver, Office, RemoteOfficeId}
@@ -17,15 +16,12 @@ trait SagaCollaboration {
 
   protected def processCollaborators: List[RemoteOfficeId[_]]
 
-  protected def deliverMsg(target: ActorPath, msg: Message): Unit = {
-    deliver(target)(deliveryId => {
-      msg.withMetaAttribute(DeliveryId, deliveryId)
-    })
-  }
+  protected def deliverMsg(target: ActorPath, msg: Message): Unit =
+    deliver(target)(deliveryId => msg.withDeliveryId(deliveryId))
 
-  protected def deliverCommand(target: ActorPath, command: Command): Unit = {
+  protected def deliverCommand(target: ActorPath, command: Command): Unit =
     deliverMsg(target, CommandMessage(command).causedBy(currentEventMsg))
-  }
+
 
   protected def schedule(event: DomainEvent, deadline: DateTime, correlationId: EntityId = sagaId): Unit = {
     val command = ScheduleEvent("global", officePath, deadline, event)

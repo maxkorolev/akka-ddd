@@ -53,9 +53,7 @@ abstract class Saga extends SagaBase {
           case DropEvent => EventDroppedMarkerEvent
         }
 
-        val emToPersist = EventMessage(eventToPersist)
-          .withMetaData(em.metadata)
-          .withCausationId(em.id)
+        val emToPersist = em.copy(event = eventToPersist, causationId = Option(em.id))
 
         persist(emToPersist) { persisted =>
           log.debug("Event message persisted: {}", persisted)
@@ -72,17 +70,16 @@ abstract class Saga extends SagaBase {
 
   private def _updateState(msg: Any): Unit = {
     msg match {
-      case EventMessage(_, receipt: Delivered) =>
+      case EventMessage(receipt: Delivered, _, _, _, _, _, _ ) =>
         confirmDelivery(receipt.deliveryId)
         updateState(receipt)
 
-      case em: EventMessage => em.event match {
-        case EventDroppedMarkerEvent =>
-          messageProcessed(em)
-        case event =>
-          messageProcessed(em)
-          updateState(event)
-      }
+      case em @ EventMessage(EventDroppedMarkerEvent, _, _, _, _, _, _ ) =>
+        messageProcessed(em)
+
+      case em @ EventMessage(event, _, _, _, _, _, _ ) =>
+        messageProcessed(em)
+        updateState(event)
     }
   }
 

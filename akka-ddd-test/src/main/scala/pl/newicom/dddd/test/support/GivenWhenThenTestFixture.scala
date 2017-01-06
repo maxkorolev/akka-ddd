@@ -6,7 +6,6 @@ import akka.util.Timeout
 import org.scalacheck.Gen
 import pl.newicom.dddd.aggregate.Command
 import pl.newicom.dddd.delivery.protocol.Processed
-import pl.newicom.dddd.messaging.MetaData
 import pl.newicom.dddd.messaging.command.CommandMessage
 import pl.newicom.dddd.office.Office
 import pl.newicom.dddd.utils.UUIDSupport._
@@ -75,7 +74,7 @@ abstract class GivenWhenThenTestFixture(_system: ActorSystem) extends TestKit(_s
 
     def when[C <: Command](wc: WhenContext[C]): When[C] = when(wc, () => {
       wc.commands.foreach { command =>
-        val cm = CommandMessage(command).withMetaData(commandMetaDataProvider(command))
+        val cm = CommandMessage(command)
         if (wc.commands.size > 1) {
           import akka.pattern.ask
           implicit val timeout = timeoutGiven
@@ -148,7 +147,7 @@ abstract class GivenWhenThenTestFixture(_system: ActorSystem) extends TestKit(_s
     Given(
       givenFun = () => {
         cs.map { c =>
-          val cm = CommandMessage(c).withMetaData(commandMetaDataProvider(c))
+          val cm = CommandMessage(c)
           Await.result((officeUnderTest.actor ? cm).mapTo[Processed], timeout.duration)
         }
       }
@@ -166,6 +165,4 @@ abstract class GivenWhenThenTestFixture(_system: ActorSystem) extends TestKit(_s
 
   def first[E](implicit wc: WhenContext[_], ct: ClassTag[E]): E =
     wc.pastEvents.first[E]
-
-  def commandMetaDataProvider(c: Command): Option[MetaData] = None
 }

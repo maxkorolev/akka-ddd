@@ -3,15 +3,14 @@ package pl.newicom.dddd.monitoring
 import pl.newicom.dddd.aggregate.BusinessEntity
 import pl.newicom.dddd.messaging.AddressableMessage
 
-case class Stage(position: Integer, shortName: String) {
+
+class Stage(val position: Integer, val shortName: String) {
 
   def traceContextName(observed: BusinessEntity, msg: AddressableMessage): String =
     s"$position-${observed.department.capitalize}-$shortName-${msg.payloadName}"
 }
 
-object Stage {
-  val Reception_Of_Command = Stage(1, "reception")
-  val Handling_Of_Command  = Stage(2, "handling")
-  val Reception_Of_Event   = Stage(3, "reception")
-  val Reaction_On_Event    = Stage(4 ,"reaction")
-}
+case object ReceptionOfCommand extends Stage(1, "reception")
+case object HandlingOfCommand extends Stage(2, "handling")
+case object ReceptionOfEvent extends Stage(3, "reception")
+case object ReactionOnEvent extends Stage(4, "reaction")

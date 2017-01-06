@@ -2,7 +2,7 @@ package pl.newicom.dddd.view.sql
 
 import akka.Done
 import com.typesafe.config.Config
-import pl.newicom.dddd.messaging.event.OfficeEventMessage
+import pl.newicom.dddd.messaging.event.EventMessage
 import pl.newicom.dddd.view.ViewHandler
 import slick.dbio.DBIOAction.sequence
 import slick.driver.JdbcProfile
@@ -17,7 +17,7 @@ class SqlViewHandler(override val config: Config, override val vuConfig: SqlView
 
   def viewMetadataId = ViewMetadataId(viewName, vuConfig.office.id)
 
-  def handle(eventMessage: OfficeEventMessage, eventNumber: Long): Future[Done] =
+  def handle(eventMessage: EventMessage, eventNumber: Long): Future[Done] =
     viewStore.run {
       sequence(vuConfig.projections.map(_.consume(eventMessage))) >>
       viewMetadataDao.insertOrUpdate(viewMetadataId, eventNumber)

@@ -69,7 +69,7 @@ class ReceptorIntegrationSpec extends OfficeSpec[DummyAggregateRoot](Some(integr
 
   val sagaProbe = TestProbe()
   system.eventStream.subscribe(sagaProbe.ref, classOf[EventApplied])
-  ignoreMsg({ case EventMessage(_, Processed(_)) => true })
+  ignoreMsg({ case EventMessage(Processed(_), _, _, _, _, _, _) => true })
 
   "Receptor" should {
 

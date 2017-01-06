@@ -47,7 +47,7 @@ abstract class AggregateRoot[S <: AggregateState[S], A <: AggregateRoot[S, A] : 
     persist(toEventMessage(event).causedBy(currentCommandMessage)) {
       persisted => {
         sm.apply(persisted)
-        handle(currentCommandSender, toOfficeEventMessage(persisted))
+        handle(currentCommandSender, persisted)
       }
     }
   }
