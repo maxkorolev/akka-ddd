@@ -120,6 +120,14 @@ lazy val `eventstore-akka-persistence` = project
     ))
   .dependsOn(`akka-ddd-messaging`)
 
+lazy val `cassandra-akka-persistence` = project
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Json.`4s` ++ Seq(
+      Eventstore.client, Eventstore.akkaJournal,
+      Akka.slf4j, Akka.persistence
+    ))
+  .dependsOn(`akka-ddd-messaging`)
 
 lazy val `http-support` = project
   .settings(

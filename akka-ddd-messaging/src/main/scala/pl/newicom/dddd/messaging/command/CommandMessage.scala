@@ -4,6 +4,7 @@ import java.util.Date
 
 import org.joda.time.DateTime
 import pl.newicom.dddd.aggregate.{Command, EntityId}
+import pl.newicom.dddd.messaging.Event.MessageProto
 import pl.newicom.dddd.messaging.{AddressableMessage, Message}
 import pl.newicom.dddd.utils.UUIDSupport.uuid
 
@@ -33,4 +34,5 @@ case class CommandMessage(
 
   def causedBy(msg: Message): CommandMessage =
     copy(correlationId = msg.correlationId, causationId = Option(msg.id))
+
 }

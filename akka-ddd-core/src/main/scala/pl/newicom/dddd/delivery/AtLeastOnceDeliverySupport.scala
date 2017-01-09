@@ -14,8 +14,6 @@ trait AtLeastOnceDeliverySupport extends PersistentActor with AtLeastOnceDeliver
 
   type DeliverableMessage = Message with AddressableMessage
 
-  def isSupporting_MustFollow_Attribute: Boolean = true
-
   private var deliveryState: DeliveryState = InitialState
 
   def destination(msg: Message): ActorPath
@@ -29,40 +27,37 @@ trait AtLeastOnceDeliverySupport extends PersistentActor with AtLeastOnceDeliver
   def deliver(msg: Message, deliveryId: Long): Unit =
     persist(msg.withDeliveryId(deliveryId))(updateState)
 
-  def deliveryIdToMessage(msg: DeliverableMessage, destination: ActorPath): Long ⇒ Any = internalDeliveryId => {
-    val deliveryId = msg.deliveryId.get
-    val destinationId: EntityId = msg.destination.get
-    val lastSentToDestinationMsgId: Option[EntityId] = deliveryState.lastSentToDestinationMsgId(destinationId)
-    deliveryState = deliveryState.withSent(msg.id, internalDeliveryId, deliveryId, destinationId)
-
-    val msgToDeliver =
-      if (isSupporting_MustFollow_Attribute) msg.withMustFollow(lastSentToDestinationMsgId)
-      else msg
-
-    log.debug(s"[DELIVERY-ID: $deliveryId] Delivering: $msgToDeliver to $destination")
-    msgToDeliver
-  }
-
-
   def updateState(msg: Any): Unit = msg match {
     case message: DeliverableMessage =>
-      if (message.destination.isEmpty) {
-        log.warning(s"No entityId. Skipping $message")
-      } else {
-        val dest: ActorPath = destination(message)
-        deliver(dest)(deliveryIdToMessage(message, dest))
-      }
 
-    case receipt: Delivered =>
-      val deliveryId = receipt.deliveryId
-      deliveryState.internalDeliveryId(deliveryId).foreach { internalDeliveryId =>
-        log.debug(s"[DELIVERY-ID: $deliveryId] - Delivery confirmed")
-        if (confirmDelivery(internalDeliveryId)) {
-          deliveryState = deliveryState.withDelivered(deliveryId)
-          deliveryConfirmed(internalDeliveryId)
+      message.destination getOrElse log.warning(s"No entityId. Skipping $message")
+      for {
+        destinationId <- message.destination
+        deliveryId <- message.deliveryId
+      } yield {
+        val dest = destination(message)
+        deliver(dest) { internalDeliveryId =>
+          val lastSentToDestinationMsgId: Option[EntityId] = deliveryState.lastSentToDestinationMsgId(destinationId)
+          deliveryState = deliveryState.withSent(message.id, internalDeliveryId, deliveryId, destinationId)
+
+          val msgToDeliver = message.withMustFollow(lastSentToDestinationMsgId)
+
+          log.debug(s"[DELIVERY-ID: $deliveryId] Delivering: $msgToDeliver to $dest")
+          msgToDeliver
         }
       }
 
+
+    case receipt: Delivered =>
+      val deliveryId = receipt.deliveryId
+      for {
+        internalDeliveryId <- deliveryState.internalDeliveryId(deliveryId)
+        if confirmDelivery(internalDeliveryId)
+      } yield {
+        log.debug(s"[DELIVERY-ID: $deliveryId] - Delivery confirmed")
+        deliveryState = deliveryState.withDelivered(deliveryId)
+        deliveryConfirmed(internalDeliveryId)
+      }
   }
 
   def deliveryStateReceive: Receive = {

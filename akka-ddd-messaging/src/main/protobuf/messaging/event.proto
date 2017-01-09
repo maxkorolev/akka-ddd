@@ -9,23 +9,14 @@ option (scalapb.options) = {
     import: "scala.collection.JavaConversions._"
 };
 
-message CaseIdProto {
-    string entityId = 1;
-    int64 version = 2;
-}
+message MessageProto {
 
-message EventMessageProto {
-
-    bytes event = 1[(scalapb.field).type = "scala.Array[Byte]"];
+    bytes event = 1 [(scalapb.field).type = "scala.Array[Byte]"];
     string id = 2;
-    int64 timestamp = 3[(scalapb.field).type = "org.joda.time.DateTime"];
-}
-
-message OfficeEventMessageProto {
-
-    CaseIdProto caseId = 1;
-    bytes event = 2[(scalapb.field).type = "scala.Array[Byte]"];
-    string id = 3;
-    int64 timestamp = 4[(scalapb.field).type = "org.joda.time.DateTime"];
+    int64 timestamp = 3 [(scalapb.field).type = "org.joda.time.DateTime"];
+    string causationId = 4;
+    string correlationId = 5;
+    string deliveryId = 6;
+    string mustFollow = 7;
 }
 

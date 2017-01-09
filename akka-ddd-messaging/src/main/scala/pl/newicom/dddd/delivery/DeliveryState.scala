@@ -36,7 +36,7 @@ sealed trait DeliveryState {
 case object InitialState extends DeliveryState {
 
   def withSent(msgId: String, internalDeliveryId: Long, deliveryId: Long, destinationId: EntityId) =
-    new DeliveryInProgressState(
+    DeliveryInProgressState(
       lastSent = deliveryId,
       size = 1,
       unconfirmed = SortedMap(deliveryId -> UnconfirmedMessageEntry(internalDeliveryId, destinationId, msgId)),
@@ -62,7 +62,7 @@ case class DeliveryInProgressState(lastSent: Long, size: Int, unconfirmed: Sorte
     unconfirmedEntry(deliveryId).map(_.internalDeliveryId)
 
   def withSent(msgId: String, internalDeliveryId: Long, deliveryId: Long, destinationId: EntityId) =
-    new DeliveryInProgressState(
+    DeliveryInProgressState(
       lastSent = deliveryId,
       size = size + 1,
       unconfirmed = unconfirmed.updated(deliveryId, UnconfirmedMessageEntry(internalDeliveryId, destinationId, msgId)),
