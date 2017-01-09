@@ -12,6 +12,7 @@ object Deps {
 
     val scalapb               = "0.5.42"
     val json4s                = "3.5.0"
+    val circe                 = "0.6.1"
 
     val Slick                 = "3.1.1"
     val PostgresqlSlickExt    = "0.14.3" // Slick 3.1.1
@@ -53,6 +54,7 @@ object Deps {
 
   object Json {
     val `4s`  = Seq(Json4s.native, Json4s.ext)
+    val circe  = Seq(Circe.core, Circe.generic, Circe.parser)
   }
 
   object Json4s {
@@ -60,6 +62,14 @@ object Deps {
     val ext     = apply("ext")
 
     private def apply(moduleName: String) = "org.json4s" %% s"json4s-$moduleName" % Version.json4s
+  }
+
+  object Circe {
+    val core     = apply("core")
+    val generic  = apply("generic")
+    val parser   = apply("parser")
+
+    private def apply(moduleName: String) = "io.circe" %% s"circe-$moduleName" % Version.circe
   }
 
   object ScalaPB {

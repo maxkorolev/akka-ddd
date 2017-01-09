@@ -16,7 +16,7 @@ object StreamIdResolver {
     case LocalOfficeId(id, _) =>
       System(s"ce-$id")
 
-    case RemoteOfficeId(id, _, _) =>
+    case RemoteOfficeId(id, _) =>
       System(s"ce-$id")
 
     case clerk: BusinessEntity =>

@@ -19,13 +19,11 @@ trait OfficeId extends BusinessEntity {
 
 case class Clerk(id: EntityId, department: String) extends BusinessEntity
 
-case class RemoteOfficeId[M: ClassTag](id: EntityId, department: String, messageClass: Class[M]) extends OfficeId {
-  def handles(command: Command) = messageClass.isAssignableFrom(command.getClass)
-}
+case class RemoteOfficeId[M <: Command](id: EntityId, department: String) extends OfficeId
 
 object LocalOfficeId {
 
-  implicit def fromRemoteId[E : ClassTag](remoteId: RemoteOfficeId[_]): LocalOfficeId[E] =
+  implicit def fromRemoteId[E](remoteId: RemoteOfficeId[_]): LocalOfficeId[E] =
     LocalOfficeId[E](remoteId.id, remoteId.department)
 }
 
