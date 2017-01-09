@@ -6,11 +6,10 @@ import akka.persistence.eventstore.snapshot.EventStoreSnapshotStore.SnapshotEven
 import akka.util.ByteString
 import eventstore.Content._
 import eventstore.{Content, ContentType, EventData}
+import io.circe.{ Decoder, Encoder, Json, Printer, jawn }
 import org.joda.time.DateTime
 import pl.newicom.dddd.aggregate._
 import pl.newicom.dddd.messaging.event.EventMessage
-import pl.newicom.dddd.serialization.JsonSerHints._
-import pl.newicom.eventstore.json.JsonSerializerExtension
 
 import scala.util.{Failure, Success, Try}
 
@@ -24,9 +23,6 @@ import scala.util.{Failure, Success, Try}
  * During deserialization original (in-memory) PersistentRepr is reconstructed.
  */
 trait EventstoreSerializationSupport {
-
-  lazy val jsonSerializer = JsonSerializerExtension(system)
-  lazy val serializationHints = fromConfig(system.settings.config)
 
   def system: ActorSystem
 
@@ -90,11 +86,11 @@ trait EventstoreSerializationSupport {
 //  }
 
   private def deserialize[T](bytes: Array[Byte], clazz: Class[T], eventType: Option[String] = None): T = {
-    jsonSerializer.fromBinary(bytes, clazz, serializationHints ++ eventType.toList)
+    null.asInstanceOf[T]
   }
 
   private def serialize(o : AnyRef, eventType: Option[String] = None): Array[Byte] =
-    jsonSerializer.toBinary(o, serializationHints ++ eventType.toList)
+    Array()
 
   private def classFor(x: AnyRef) = x match {
     case x: PersistentRepr => classOf[PersistentRepr]

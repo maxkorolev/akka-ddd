@@ -33,7 +33,7 @@ lazy val `akka-ddd-messaging` = project
       PB.gens.java -> (sourceManaged in Compile).value,
       scalapb.gen(javaConversions = true) -> (sourceManaged in Compile).value
     ),
-    libraryDependencies ++= Json.`4s` ++ Seq(Akka.stream, nscalaTime, ScalaPB.core)
+    libraryDependencies ++= Json.circe ++ Seq(Akka.stream, nscalaTime, ScalaPB.core)
   )
 
 
@@ -114,7 +114,7 @@ lazy val `akka-ddd-test` = project
 lazy val `eventstore-akka-persistence` = project
   .settings(
     commonSettings,
-    libraryDependencies ++= Json.`4s` ++ Seq(
+    libraryDependencies ++= Json.circe ++ Seq(
       Eventstore.client, Eventstore.akkaJournal,
       Akka.slf4j, Akka.persistence
     ))
@@ -123,7 +123,7 @@ lazy val `eventstore-akka-persistence` = project
 lazy val `cassandra-akka-persistence` = project
   .settings(
     commonSettings,
-    libraryDependencies ++= Json.`4s` ++ Seq(
+    libraryDependencies ++= Json.circe ++ Seq(
       Eventstore.client, Eventstore.akkaJournal,
       Akka.slf4j, Akka.persistence
     ))

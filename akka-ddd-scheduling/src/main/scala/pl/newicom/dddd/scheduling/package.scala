@@ -5,10 +5,10 @@ import pl.newicom.dddd.office.RemoteOfficeId
 
 package object scheduling {
 
-  def schedulingOfficeId(department: String) = RemoteOfficeId("deadlines", department, classOf[ScheduleEvent])
+  def schedulingOfficeId(department: String) = RemoteOfficeId[ScheduleEvent]("deadlines", department)
 
   def schedulingLocalOfficeId(department: String) = fromRemoteId[Scheduler](schedulingOfficeId(department))
 
-  def currentDeadlinesOfficeId(department: String) = RemoteOfficeId("currentDeadlines", department, classOf[ScheduleEvent])
+  def currentDeadlinesOfficeId(department: String) = RemoteOfficeId[ScheduleEvent]("currentDeadlines", department)
 
 }

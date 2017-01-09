@@ -23,7 +23,7 @@ case class RemoteOfficeId[M <: Command](id: EntityId, department: String) extend
 
 object LocalOfficeId {
 
-  implicit def fromRemoteId[E](remoteId: RemoteOfficeId[_]): LocalOfficeId[E] =
+  implicit def fromRemoteId[E : ClassTag](remoteId: RemoteOfficeId[_]): LocalOfficeId[E] =
     LocalOfficeId[E](remoteId.id, remoteId.department)
 }
 

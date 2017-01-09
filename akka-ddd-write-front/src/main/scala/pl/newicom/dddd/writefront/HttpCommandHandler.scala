@@ -8,12 +8,12 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server._
 import akka.pattern.ask
 import akka.util.Timeout
-import org.json4s.Formats
 import pl.newicom.dddd.aggregate.Command
 import pl.newicom.dddd.http.JsonMarshalling
 import pl.newicom.dddd.office.RemoteOfficeId
 import pl.newicom.dddd.streams.ImplicitMaterializer
 import pl.newicom.dddd.delivery.protocol.Processed
+import io.circe.{ Decoder, Encoder }
 
 import scala.util.{Failure, Success, Try}
 
@@ -25,7 +25,7 @@ trait HttpCommandHandler extends GlobalOfficeClientSupport with Directives with 
   import context.dispatcher
   implicit def timeout: Timeout
 
-  def inOffice[A <: Command](officeId: RemoteOfficeId[A])(implicit f: Formats): Route = {
+  def inOffice[A <: Command: Encoder: Decoder](officeId: RemoteOfficeId[A]): Route = {
     post {
       entity(as[A]) { command =>
         complete {

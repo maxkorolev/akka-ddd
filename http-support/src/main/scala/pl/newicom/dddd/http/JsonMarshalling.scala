@@ -1,30 +1,42 @@
 package pl.newicom.dddd.http
 
-import akka.http.scaladsl.marshalling.{PredefinedToEntityMarshallers, ToEntityMarshaller => TEM}
-import akka.http.scaladsl.model.{ContentTypeRange, MediaRange, MediaTypes}
-import akka.http.scaladsl.unmarshalling.Unmarshaller.UnsupportedContentTypeException
-import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller => FEUM, PredefinedFromEntityUnmarshallers}
-import akka.http.scaladsl.util.FastFuture
-import akka.stream.Materializer
-import org.json4s.Formats
-import org.json4s.native.Serialization._
-
-import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.marshalling.{ Marshaller, ToEntityMarshaller }
+import akka.http.scaladsl.model.MediaTypes.`application/json`
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller }
+import akka.util.ByteString
+import io.circe.{ Decoder, Encoder, Json, Printer, jawn }
 
 trait JsonMarshalling {
 
-  implicit def feum[A: Manifest](implicit formats: Formats, m: Materializer, ec: ExecutionContext): FEUM[A] =
-    PredefinedFromEntityUnmarshallers.stringUnmarshaller.flatMapWithInput { (entity, s) =>
-      if (entity.contentType.mediaType == MediaTypes.`application/json`)
-        FastFuture.successful(read[A](s))
-      else
-        FastFuture.failed(
-          UnsupportedContentTypeException(ContentTypeRange(MediaRange(MediaTypes.`application/json`)))
-        )
-    }
+  private val jsonStringUnmarshaller =
+    Unmarshaller.byteStringUnmarshaller.
+      forContentTypes(`application/json`).
+      mapWithCharset {
+        case (ByteString.empty, _) => throw Unmarshaller.NoContentException
+        case (data, charset)       => data.decodeString(charset.nioCharset.name)
+      }
 
-  implicit def tem[A <: AnyRef](implicit formats: Formats): TEM[A] = {
-    val stringMarshaller = PredefinedToEntityMarshallers.stringMarshaller(MediaTypes.`application/json`)
-    stringMarshaller.compose(writePretty[A])
-  }
+  private val jsonStringMarshaller =
+    Marshaller.stringMarshaller(`application/json`)
+
+  /**
+    * HTTP entity => `A`
+    *
+    * @param decoder decoder for `A`, probably created by `circe.generic`
+    * @tparam A type to decode
+    * @return unmarshaller for `A`
+    */
+  implicit def circeUnmarshaller[A](implicit decoder: Decoder[A]): FromEntityUnmarshaller[A] =
+    jsonStringUnmarshaller.map(jawn.decode(_).fold(throw _, identity))
+
+  /**
+    * `A` => HTTP entity
+    *
+    * @param encoder encoder for `A`, probably created by `circe.generic`
+    * @param printer pretty printer function
+    * @tparam A type to encode
+    * @return marshaller for any `A` value
+    */
+  implicit def circeToEntityMarshaller[A](implicit encoder: Encoder[A], printer: Json => String = Printer.noSpaces.pretty): ToEntityMarshaller[A] =
+    jsonStringMarshaller.compose(printer).compose(encoder.apply)
 }
